@@ -36,8 +36,9 @@ namespace vectors {
 		}
 
 		bool operator == (Point<T> rhs) {
-			if ((x == rhs.x)) && (y == rhs.y)
+			if ((x == rhs.x)) && (y == rhs.y) {
 				return true;
+			}
 			return false;
 		}
 	};
@@ -52,18 +53,80 @@ namespace vectors {
 	class Line {
 	private:
 		Point<T>** _data;
-		int _size;
+		int _count;
 	public:
 		Line() {
 			_data = new Point<T>*;
 			_data[0] = new Point<T>;
-			_size = 1;
+			_count = 1;
+		}
+		Line(Point<T>& rhs) { // по координатам
+			_data = new Point<T>*;
+			_data[0] = new Point<T>(rhs.x, rhs.y);
+			_count = 1
+		}
+		Line(size_t count) {
+			_data = new Point<T>*[count];
+			for (int i = 0; i < count; ++i) {
+				_data[i] = new Point<T>;
+			}
+			_count = count;
+		}
+		Line(int count, T x1, T x2, T y1, T y2) { // по диапазону
+			_data = new Point<T>*[count];
+			for (int i = 0; i < count; ++i)
+				_data[i] = new Point<T>(random(x1, x2), random(y1, y2));
+			_count = count;
+		}
+		Line(Line<T>& other) { 
+			_data = new Point<T>*[other._count];
+			for (int i = 0; i < other._count; ++i)
+				_data[i] = new Point<T>(other[i]);
+			_count = other._count;
+		}
+		~Line() {
+			for (int i = 0; i < _count; ++i) {
+				delete _data[i]
+			}
+			delete _data;
+			cout << "Line was deleted!" << endl;
 		}
 
-		Line(Point<T>& rhs) {
-			
+		int size() {
+			return _count;
 		}
 
+		float lenght() { // Вычисление длины ломанной 
+			float len = 0;
+			for (int i = 1; i < _count; ++i) {
+				len += _data[i]->len(*_data[i - 1]);
+			}
+			return len;
+		}
+
+		float push_back() {
+
+		}
+
+		float push_front() {
+
+		}
+
+		Line& operator=(Line<T>& other) {
+			Line copy(other);
+			swap(copy);
+			return *this;
+		}
+		void swap(Line<T>& rhs) {
+			std::swap(_count, rhs._count);
+			std::swap(_data, rhs._data);
+		}
+
+		Point<T>& operator[](size_t index) {
+			if (index >= _count)
+				throw ("Index is out of range!");
+			return *_data[index];
+		}
 	};
 
 }
