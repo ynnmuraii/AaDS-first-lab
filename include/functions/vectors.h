@@ -5,6 +5,7 @@
 #include <random>
 #include <stdexcept>
 #include <cmath>
+#include <vector>
 
 using namespace std;
 
@@ -92,10 +93,9 @@ namespace vectors {
 			cout << "Line was deleted!" << endl;
 		}
 
-		int size() {
+		int count() {
 			return _count;
 		}
-
 		float lenght() { // Вычисление длины ломанной 
 			float len = 0;
 			for (int i = 1; i < _count; ++i) {
@@ -103,13 +103,23 @@ namespace vectors {
 			}
 			return len;
 		}
+		void push_back(const Point<T>& point) {
+			std::vector<Point<T>*> copy(_data, _data + _size);
+			copy.push_back(new Point<T>(point));
 
-		float push_back() {
-
+			for (Point<T>* ptr : _data)
+				delete ptr;
+			_data = copy.data();
+			_size++;
 		}
+		void push_front(const Point<T>& point) {
+			std::vector<Point<T>*> copy(_data, _data + _size);
+			copy.insert(copy.begin(), new Point<T>(point));
 
-		float push_front() {
-
+			for (Point<T>* ptr : _data)
+				delete ptr;
+			_data = copy.data();
+			_size++;
 		}
 
 		Line& operator=(Line<T>& other) {
@@ -121,12 +131,28 @@ namespace vectors {
 			std::swap(_count, rhs._count);
 			std::swap(_data, rhs._data);
 		}
-
 		Point<T>& operator[](size_t index) {
 			if (index >= _count)
 				throw ("Index is out of range!");
 			return *_data[index];
 		}
+		Line<T> operator+(Line<T>& rhs) {
+			Line<T> new_line(*_data[0]);
+			for (int i = 1; i < _size; ++i) {
+				new_line.push_back(*_data[i]);
+			}
+			for (int i = 0; i < rhs._size; ++i) {
+				new_line.push_back(*rhs._data[i]);
+			}
+			return new_line;
+		}
 	};
 
+	template<typename T>
+	ostream& operator<<(ostream& os, Line<T>& line) {
+		for (int i = 0; i < line.count(); ++i) {
+			cout << line[i] << endl;
+		}
+		return os;
+	}
 }
