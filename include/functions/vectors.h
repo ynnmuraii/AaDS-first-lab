@@ -1,11 +1,15 @@
 #pragma once
 
-#include <iostream>
-#include <stdlib.h>
-#include <random>
-#include <stdexcept>
-#include <cmath>
-#include <vector>
+#include<iostream>
+#include<stdlib.h>
+#include<random>
+#include<conio.h>
+#include<cmath>
+#include<windows.h>
+#include<stdexcept>
+#include<vector>
+
+#define M_PI 3.14159
 
 using namespace std;
 
@@ -28,7 +32,7 @@ namespace vectors {
 		Point(T _x, T _y) : x(_x), y(_y) {}
 		Point(const Point<T>& rhs) : x(rhs.x), y(rhs.y) {}
 
-		float lenght(Point& rhs) {
+		float length(Point& rhs) {
 			return static_cast<float>(sqrt((x - rhs.x) * (x - rhs.x) + (y - rhs.y) * (y - rhs.y)));
 		}
 
@@ -37,7 +41,7 @@ namespace vectors {
 		}
 
 		bool operator == (Point<T> rhs) {
-			if ((x == rhs.x)) && (y == rhs.y) {
+			if ((x == rhs.x) && (y == rhs.y)) {
 				return true;
 			}
 			return false;
@@ -53,9 +57,12 @@ namespace vectors {
 	template<typename T>
 	class Line {
 	private:
+
 		Point<T>** _data;
 		int _count;
+
 	public:
+
 		Line() {
 			_data = new Point<T>*;
 			_data[0] = new Point<T>;
@@ -64,7 +71,7 @@ namespace vectors {
 		Line(Point<T>& rhs) { // по координатам
 			_data = new Point<T>*;
 			_data[0] = new Point<T>(rhs.x, rhs.y);
-			_count = 1
+			_count = 1;
 		}
 		Line(size_t count) {
 			_data = new Point<T>*[count];
@@ -79,7 +86,7 @@ namespace vectors {
 				_data[i] = new Point<T>(random(x1, x2), random(y1, y2));
 			_count = count;
 		}
-		Line(Line<T>& other) { 
+		Line(Line<T>& other) {
 			_data = new Point<T>*[other._count];
 			for (int i = 0; i < other._count; ++i)
 				_data[i] = new Point<T>(other[i]);
@@ -87,7 +94,7 @@ namespace vectors {
 		}
 		~Line() {
 			for (int i = 0; i < _count; ++i) {
-				delete _data[i]
+				delete _data[i];
 			}
 			delete _data;
 			cout << "Line was deleted!" << endl;
@@ -103,23 +110,27 @@ namespace vectors {
 			}
 			return len;
 		}
-		void push_back(const Point<T>& point) {
-			std::vector<Point<T>*> copy(_data, _data + _size);
-			copy.push_back(new Point<T>(point));
-
-			for (Point<T>* ptr : _data)
-				delete ptr;
-			_data = copy.data();
-			_size++;
+		void push_back(Point<T>&& point) { // Сложение ломаной и вершины
+			Point<T>** copy = new Point<T>*[_count + 1];
+			for (int i = 0; i < _count; ++i)
+				copy[i] = new Point<T>(*_data[i]);
+			copy[_count] = new Point<T>(point);
+			for (int i = 0; i < _count; ++i)
+				delete _data[i];
+			delete[] _data;
+			_data = copy;
+			_count++;
 		}
-		void push_front(const Point<T>& point) {
-			std::vector<Point<T>*> copy(_data, _data + _size);
-			copy.insert(copy.begin(), new Point<T>(point));
-
-			for (Point<T>* ptr : _data)
-				delete ptr;
-			_data = copy.data();
-			_size++;
+		void push_front(Point<T>&& point) { // Слоение вершины и ломаной
+			Point<T>** copy = new Point<T>*[_count + 1];
+			for (int i = 1; i < _count + 1; ++i)
+				copy[i] = new Point<T>(*_data[i - 1]);
+			copy[0] = new Point<T>(point);
+			for (int i = 0; i < _count; ++i)
+				delete _data[i];
+			delete[] _data;
+			_data = copy;
+			_count++;
 		}
 
 		Line& operator=(Line<T>& other) {
@@ -138,10 +149,10 @@ namespace vectors {
 		}
 		Line<T> operator+(Line<T>& rhs) {
 			Line<T> new_line(*_data[0]);
-			for (int i = 1; i < _size; ++i) {
+			for (int i = 1; i < _count; ++i) {
 				new_line.push_back(*_data[i]);
 			}
-			for (int i = 0; i < rhs._size; ++i) {
+			for (int i = 0; i < rhs._count; ++i) {
 				new_line.push_back(*rhs._data[i]);
 			}
 			return new_line;
@@ -154,5 +165,35 @@ namespace vectors {
 			cout << line[i] << endl;
 		}
 		return os;
+	}
+
+	template<typename T>
+	Line<T> draw_broken_line_triangle() {
+		T a;
+		float alpha;
+
+		cout << "Enter the length of the side (a): ";
+		cin >> a;
+		cout << "Enter the vertex angle (alpha) in degrees: ";
+		cin >> alpha;
+
+		float angle = alpha * M_PI / 180.0;
+
+		Line<T> triangle;
+
+		Point<T> vertex(0, 0);
+		triangle.push_back(std::move(vertex));
+
+		float x1 = a * cos(angle);
+		float y1 = a * sin(angle);
+		Point<T> point1(x1, y1);
+		triangle.push_back(std::move(point1));
+
+		float x2 = -a * cos(angle);
+		float y2 = a * sin(angle);
+		Point<T> point2(x2, y2);
+		triangle.push_back(std::move(point2));
+
+		return triangle;
 	}
 }
