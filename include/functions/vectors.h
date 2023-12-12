@@ -2,10 +2,7 @@
 
 #include<iostream>
 #include<stdlib.h>
-#include<random>
-#include<conio.h>
 #include<cmath>
-#include<windows.h>
 #include<stdexcept>
 #include<vector>
 
@@ -14,15 +11,6 @@
 using namespace std;
 
 namespace vectors {
-
-	template<typename T>
-	T random(T a, T b) {
-		std::random_device random_device;
-		std::mt19937 generator(random_device());
-		std::uniform_int_distribution<> distribution(a, b);
-		T x = distribution(generator);
-		return x;
-	}
 
 	template<typename T>
 	struct Point {
