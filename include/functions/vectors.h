@@ -5,6 +5,8 @@
 #include<cmath>
 #include<stdexcept>
 #include<vector>
+#include<complex>
+#include<random>
 
 #define M_PI 3.14159
 
@@ -18,11 +20,8 @@ namespace vectors {
 
 		Point() : x(0), y(0) {}
 		Point(T _x, T _y) : x(_x), y(_y) {}
+		Point(std::complex<T> _x, std::complex<T> _y) : x(_x), y(_y) {} // Добавил комплексн.
 		Point(const Point<T>& rhs) : x(rhs.x), y(rhs.y) {}
-
-		float length(Point& rhs) {
-			return static_cast<float>(sqrt((x - rhs.x) * (x - rhs.x) + (y - rhs.y) * (y - rhs.y)));
-		}
 
 		void print() {
 			cout << x << " " << y << endl;
@@ -34,12 +33,46 @@ namespace vectors {
 			}
 			return false;
 		}
+
+		bool operator!=(const Point<T>& a) {
+			return !(*this == a);
+		}
 	};
+
+	template<typename U>
+	double length(Point<complex<U>>& a, Point<complex<U>>& b) {
+		return fabs(sqrt(pow(a._x.real() - b._x.real(), 2) + pow(a._y.real() - b._y.real(), 2)));
+	}
+	template<typename T>
+	double length(Point<T>& a, Point<T>& b) {
+		return sqrt(pow(a._x - b._x, 2) + pow(a._y - b._y, 2));
+	}
 
 	template<typename T>
 	ostream& operator<<(ostream& os, Point<T>& point) {
 		cout << point.x << " " << point.y << endl;
 		return os;
+	}
+	template<typename T>
+	T random(T x, T y) {
+		std::random_device random_device;
+		std::mt19937 generator(random_device());
+		std::uniform_int_distribution<> distribution(x, y);
+		T x = distribution(generator);
+		return x;
+	}
+
+	template<typename T>
+	complex<T> random(complex<T> m1, complex<T> m2) {
+		std::random_device random_device;
+		std::mt19937 generator(random_device());
+		std::uniform_real_distribution<> real_distribution(m1.real(), m2.real());
+		std::uniform_real_distribution<> imag_distribution(m1.imag(), m2.imag());
+
+		T real_part = real_distribution(generator);
+		T imag_part = imag_distribution(generator);
+
+		return complex<T>(real_part, imag_part);
 	}
 
 	template<typename T>
@@ -91,12 +124,13 @@ namespace vectors {
 		int count() {
 			return _count;
 		}
-		float lenght() { // Вычисление длины ломанной 
-			float len = 0;
-			for (int i = 1; i < _count; ++i) {
-				len += _data[i]->len(*_data[i - 1]);
+		double length_line () {
+			double lenght = 0;
+			for (size_t i = 1; i < _count; i++)
+			{
+				lenght += length(_data[i], _data[i - 1]);
 			}
-			return len;
+			return lenght;
 		}
 		void push_back(Point<T>&& point) { // Сложение ломаной и вершины
 			Point<T>** copy = new Point<T>*[_count + 1];
@@ -109,7 +143,7 @@ namespace vectors {
 			_data = copy;
 			_count++;
 		}
-		void push_front(Point<T>&& point) { // Слоение вершины и ломаной
+		void push_front(Point<T>&& point) { // Сложение вершины и ломаной
 			Point<T>** copy = new Point<T>*[_count + 1];
 			for (int i = 1; i < _count + 1; ++i)
 				copy[i] = new Point<T>(*_data[i - 1]);
@@ -135,15 +169,20 @@ namespace vectors {
 				throw ("Index is out of range!");
 			return *_data[index];
 		}
-		Line<T> operator+(Line<T>& rhs) {
-			Line<T> new_line(*_data[0]);
-			for (int i = 1; i < _count; ++i) {
-				new_line.push_back(*_data[i]);
-			}
+		Line<T> operator+(const Line<T>& rhs) const {
+			Line<T> result(*this);
 			for (int i = 0; i < rhs._count; ++i) {
-				new_line.push_back(*rhs._data[i]);
+				result.push_back(*rhs._data[i]);
 			}
-			return new_line;
+			return result;
+		}
+		Line<T>& operator+=(Point<T>&& point) {
+			push_back(std::move(point));
+			return *this;
+		}
+		Line<T>& operator+(Point<T>&& point) {
+			push_front(std::move(point));
+			return *this;
 		}
 	};
 
@@ -165,7 +204,7 @@ namespace vectors {
 		cout << "Enter the vertex angle (alpha) in degrees: ";
 		cin >> alpha;
 
-		float angle = alpha * M_PI / 180.0;
+		double angle = alpha * M_PI / 180.0;
 
 		Line<T> triangle;
 
