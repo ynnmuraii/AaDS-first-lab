@@ -107,11 +107,11 @@ namespace vectors {
 				_data[i] = new Point<T>(random(x1, x2), random(y1, y2));
 			_count = count;
 		}
-		Line(Line<T>& other) {
-			_data = new Point<T>*[other._count];
-			for (int i = 0; i < other._count; ++i)
-				_data[i] = new Point<T>(other[i]);
+		Line(const Line<T>& other) {
 			_count = other._count;
+			_data = new Point<T>*[_count];
+			for (int i = 0; i < _count; ++i)
+				_data[i] = new Point<T>(*other._data[i]);
 		}
 		~Line() {
 			for (int i = 0; i < _count; ++i) {
@@ -155,9 +155,17 @@ namespace vectors {
 			_count++;
 		}
 
-		Line& operator=(Line<T>& other) {
-			Line copy(other);
-			swap(copy);
+		Line& operator=(const Line<T>& other) {
+			if (this != &other) { 
+				for (int i = 0; i < _count; ++i)
+					delete _data[i];
+				delete[] _data;
+
+				_count = other._count;
+				_data = new Point<T>*[_count];
+				for (int i = 0; i < _count; ++i)
+					_data[i] = new Point<T>(*other._data[i]);
+			}
 			return *this;
 		}
 		void swap(Line<T>& rhs) {
@@ -184,6 +192,19 @@ namespace vectors {
 			push_front(std::move(point));
 			return *this;
 		}
+
+		friend Line<T> operator+(const Point<T>& point, const Line<T>& line) {
+			Line<T> result(line);
+			result.push_front(Point<T>(point));
+			return result;
+		}
+
+		friend Line<T> operator+(const Line<T>& line, const Point<T>& point) {
+			Line<T> result(line);
+			result.push_back(Point<T>(point));
+			return result;
+		}
+
 	};
 
 	template<typename T>
