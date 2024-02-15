@@ -10,17 +10,17 @@ int main() {
     Point<float> vertex1(0, 0);
     Point<float> vertex2(7, 0);
     Point<float> vertex3(0.1, 3);
-
     Line<float> triangle(vertex1);
     Line<float> triangle1;
-
     cout << triangle;
 
     triangle1 = triangle + vertex2;
-
     triangle = vertex1 + triangle1 + vertex3;
-
     cout << triangle;
+
+    Line<float> triangle3;
+    triangle3 = triangle + triangle1;
+    cout << triangle3;
 
     return 0;
 }

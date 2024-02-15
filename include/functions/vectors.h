@@ -124,7 +124,7 @@ namespace vectors {
 		int count() {
 			return _count;
 		}
-		double length_line () {
+		double length_line() {
 			double lenght = 0;
 			for (size_t i = 1; i < _count; i++)
 			{
@@ -156,7 +156,7 @@ namespace vectors {
 		}
 
 		Line& operator=(const Line<T>& other) {
-			if (this != &other) { 
+			if (this != &other) {
 				for (int i = 0; i < _count; ++i)
 					delete _data[i];
 				delete[] _data;
@@ -180,7 +180,7 @@ namespace vectors {
 		Line<T> operator+(const Line<T>& rhs) const {
 			Line<T> result(*this);
 			for (int i = 0; i < rhs._count; ++i) {
-				result.push_back(*rhs._data[i]);
+				result.push_back(std::move(*rhs._data[i]));
 			}
 			return result;
 		}
@@ -204,6 +204,18 @@ namespace vectors {
 			result.push_back(Point<T>(point));
 			return result;
 		}
+
+		template<typename T>
+		Line<T> add_lines(const Line<T>& line1, const Line<T>& line2) {
+			Line<T> result(line1);
+
+			for (int i = 0; i < line2.count(); ++i) {
+				result.push_back(*line2._data[i]);
+			}
+
+			return result;
+		}
+
 
 	};
 
